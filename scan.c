@@ -26,7 +26,7 @@ main(int argc, char **argv)
     for (;;) {
         len = read(fd, buf, sizeof buf);
         if (len == -1 && errno != EAGAIN) {
-            perror("Error while read");
+            perror("Error during read()");
             return 1;
         }
 
