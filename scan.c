@@ -5,7 +5,18 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/inotify.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
+
+int
+is_dir(const char *path)
+{
+    struct stat path_stat;
+    stat(path, &path_stat);
+    return S_ISDIR(path_stat.st_mode);
+    
+}
 
 void
 watch_directory(int watch_fd, const char *directory)
@@ -31,9 +42,6 @@ watch_directory(int watch_fd, const char *directory)
     // Check all of the files in this directory
     // in a DFS manner
     while (( dp = readdir(dir) ) != NULL) {
-
-
-
         // Recursivley start watching a subdir
         if (dp->d_type == DT_DIR) {
 
@@ -86,7 +94,13 @@ main(int argc, char **argv)
             event = (const struct inotify_event *) ptr;
 
             if (event->mask & IN_CREATE) {
-                printf("Created file %s\n", event->name);
+                if (is_dir(event->name)) {
+                    printf("Created folder %s\n", event->name);
+                    watch_directory(watch_fd, event->name);
+
+                } else {
+                    printf("Created file %s\n", event->name);
+                }
                 continue;
             }
             
