@@ -85,36 +85,37 @@ main(int argc, char **argv)
         for (ptr = buf; ptr < buf + len; ptr += sizeof(struct inotify_event) + event->len){
             event = (const struct inotify_event *) ptr;
 
-            switch (event->mask)
-            {
-            case IN_CREATE:
+            if (event->mask & IN_CREATE) {
                 printf("Created file %s\n", event->name);
-                break;
-            
-            case IN_DELETE:
-                printf("Deleted file %s\n", event->name);
-                break;
-
-            case IN_DELETE_SELF:
-                printf("Deleted dir %s\n", event->name);
-                break;
-
-            case IN_MOVED_TO:
-                printf("Moved file %s\n", event->name);
-                break;
-
-            case IN_MOVED_FROM:
-                printf("Moved file %s into dir\n", event->name);
-                break;
-
-            case IN_MOVE_SELF:
-                printf("Dir %s file moved out of watch dir\n", event->name);
-                break;
-            
-            default:
-                printf("Unknown event returned from Inotify. MASK %u\n", event->mask);
-                break;
+                continue;
             }
+            
+            if (event->mask & IN_DELETE) {
+                printf("Deleted file %s\n", event->name);
+                continue;
+            }
+
+            if (event->mask & IN_DELETE_SELF) {
+                printf("Deleted dir %s\n", event->name);
+                continue;
+            }
+
+            if (event->mask & IN_MOVED_TO) {
+                printf("Moved file %s into dir\n", event->name);
+                continue;
+            }
+
+            if (event->mask & IN_MOVED_FROM) {
+                printf("Moved file %s from dir\n", event->name);
+                continue;
+            }
+
+            if (event->mask & IN_MOVE_SELF) {
+                printf("Dir %s file moved out of watch dir\n", event->name);
+                continue;
+            }
+            
+            printf("Unknown event returned from Inotify. MASK %u\n", event->mask);
 
         }
 
